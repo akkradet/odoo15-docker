@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+
+  odoo:
+    image: akkradet/odoo-th:15.0
+    container_name: odoo
+    restart: unless-stopped
+    links:
+      - db:db    
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+
+  db:
+    image: postgres:10
+    container_name: db
+    restart: unless-stopped       
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin
+    restart: unless-stopped
+    image: dpage/pgadmin4
+    #   user : pgadmin4@pgadmin.org, passwd : admin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pg-data:/var/lib/pgadmin
+volumes:
+  odoo-data:
+  db-data:
+  pg-data:
